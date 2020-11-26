@@ -7,11 +7,11 @@ url = "http://www.baidu.com"
 url2 = "http://www.httpbin.org"
 url3 = "http://github.com"
 
-# r_get = requests.get(url2)
+r_get = requests.get(url2)
 # r_post = requests.post(url2+ "/post",data={'key':'value'})
 # r_delete = requests.delete(url2+ "/delete")
 
-# print(r.text)
+print(r_get.text)
 # print(r.headers)
 # print(r.encoding)
 # print(r.json())
@@ -37,7 +37,7 @@ url3 = "http://github.com"
 
 ####################
 # 超时
-r = requests.get(url3,timeout = 4)
+# r = requests.get(url3,timeout = 4)
 
 ####################
 # 异常

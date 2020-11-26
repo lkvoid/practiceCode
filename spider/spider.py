@@ -1,9 +1,17 @@
-#-*-conding=utf-8-*-
+#-*-conding = utf-8 -*-
+#name:spider
+#爬取豆瓣top250的电影然后进行数据分析和可视化练习
+#url:http://douban.com/top250?start=0
+#1.通过requests包获取网页信息
+#2.利用bs4对网页信息进行解析
+#3.将数据存入sqlite中
+#4.使用flask进行网页展示，***包进行可视化
+####################################
 
+import requests,re,sqlite3
 from bs4 import BeautifulSoup
-import re
 
-html_doc = """
+html = """
 <html lang="zh-CN" class="ua-mac ua-webkit"><head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="renderer" content="webkit">
@@ -12,11 +20,11 @@ html_doc = """
     <title>
 豆瓣电影 Top 250
 </title>
-    
+
     <meta name="baidu-site-verification" content="cZdR4xxR7RxmM4zE">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="Sun, 6 Mar 2005 01:00:00 GMT">
-    
+
     <link rel="apple-touch-icon" href="https://img3.doubanio.com/f/movie/d59b2715fdea4968a450ee5f6c95c7d7a2030065/pics/movie/apple-touch-icon.png">
     <link href="https://img3.doubanio.com/f/shire/859dba5cddc7ed1435808cf5a8ddde5792cd6e0c/css/douban.css" rel="stylesheet" type="text/css">
     <link href="https://img3.doubanio.com/f/shire/db02bd3a4c78de56425ddeedd748a6804af60ee9/css/separation/_all.css" rel="stylesheet" type="text/css">
@@ -25,7 +33,7 @@ html_doc = """
     <script type="text/javascript" src="https://img3.doubanio.com/f/movie/0495cb173e298c28593766009c7b0a953246c5b5/js/movie/lib/jquery.js"></script>
     <script type="text/javascript" src="https://img3.doubanio.com/f/shire/5ecaf46d6954d5a30bc7d99be86ae34031646e00/js/douban.js"></script>
     <script type="text/javascript" src="https://img3.doubanio.com/f/shire/0efdc63b77f895eaf85281fb0e44d435c6239a3f/js/separation/_all.js"></script>
-    
+
 <link href="https://img3.doubanio.com/f/movie/2c95f768ea74284b900c04c0209b0a44f0a0de52/css/movie/top_movies.css" rel="stylesheet" type="text/css">
 <script type="text/javascript" src="https://img3.doubanio.com/f/shire/77323ae72a612bba8b65f845491513ff3329b1bb/js/do.js" data-cfg-autoload="false"></script>
 <script type="text/javascript">
@@ -48,11 +56,11 @@ html_doc = """
 <script src="https://ssl.google-analytics.com/ga.js" async="true"></script></head>
 
 <body>
-  
+
     <script type="text/javascript">var _body_start = new Date();</script>
 
-    
-    
+
+
 
 
 
@@ -62,7 +70,7 @@ html_doc = """
 
 <div id="db-global-nav" class="global-nav">
   <div class="bd">
-    
+
 <div class="top-nav-info">
   <a href="https://accounts.douban.com/passport/login?source=movie" class="nav-login" rel="nofollow">登录/注册</a>
 </div>
@@ -85,7 +93,7 @@ html_doc = """
   </div>
 </div>
 
-    
+
 
 
 <div class="global-nav-items">
@@ -140,7 +148,7 @@ html_doc = """
 
 
 
-    
+
 
 
 
@@ -170,7 +178,7 @@ html_doc = """
   </div>
   </div>
   <div class="nav-secondary">
-    
+
 
 <div class="nav-items">
   <ul>
@@ -233,20 +241,20 @@ html_doc = """
 
 
 
-    
-    <div id="wrapper">
-        
 
-        
+    <div id="wrapper">
+
+
+
     <div id="content">
-        
+
     <h1>豆瓣电影 Top 250</h1>
 
         <div class="grid-16-8 clearfix">
-            
-            
+
+
             <div class="article">
-                
+
 
 
 
@@ -256,8 +264,8 @@ html_doc = """
 
 <div class="opt mod">
     <div class="tabs">
-      
-    
+
+
 
     </div>
     <span id="mine-selector">
@@ -293,7 +301,7 @@ html_doc = """
                             1994&nbsp;/&nbsp;美国&nbsp;/&nbsp;犯罪 剧情
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating5-t"></span>
                                 <span class="rating_num" property="v:average">9.7</span>
@@ -332,7 +340,7 @@ html_doc = """
                             1993&nbsp;/&nbsp;中国大陆 中国香港&nbsp;/&nbsp;剧情 爱情 同性
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating5-t"></span>
                                 <span class="rating_num" property="v:average">9.6</span>
@@ -372,7 +380,7 @@ html_doc = """
                             1994&nbsp;/&nbsp;美国&nbsp;/&nbsp;剧情 爱情
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating5-t"></span>
                                 <span class="rating_num" property="v:average">9.5</span>
@@ -411,7 +419,7 @@ html_doc = """
                             1994&nbsp;/&nbsp;法国 美国&nbsp;/&nbsp;剧情 动作 犯罪
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.4</span>
@@ -451,7 +459,7 @@ html_doc = """
                             1997&nbsp;/&nbsp;美国&nbsp;/&nbsp;剧情 爱情 灾难
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.4</span>
@@ -490,7 +498,7 @@ html_doc = """
                             1997&nbsp;/&nbsp;意大利&nbsp;/&nbsp;剧情 喜剧 爱情 战争
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating5-t"></span>
                                 <span class="rating_num" property="v:average">9.5</span>
@@ -530,7 +538,7 @@ html_doc = """
                             2001&nbsp;/&nbsp;日本&nbsp;/&nbsp;剧情 动画 奇幻
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.4</span>
@@ -570,7 +578,7 @@ html_doc = """
                             1993&nbsp;/&nbsp;美国&nbsp;/&nbsp;剧情 历史 战争
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating5-t"></span>
                                 <span class="rating_num" property="v:average">9.5</span>
@@ -610,7 +618,7 @@ html_doc = """
                             2010&nbsp;/&nbsp;美国 英国&nbsp;/&nbsp;剧情 科幻 悬疑 冒险
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.3</span>
@@ -650,7 +658,7 @@ html_doc = """
                             2009&nbsp;/&nbsp;美国 英国&nbsp;/&nbsp;剧情
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.4</span>
@@ -690,7 +698,7 @@ html_doc = """
                             1998&nbsp;/&nbsp;意大利&nbsp;/&nbsp;剧情 音乐
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.3</span>
@@ -730,7 +738,7 @@ html_doc = """
                             2014&nbsp;/&nbsp;美国 英国 加拿大 冰岛&nbsp;/&nbsp;剧情 科幻 冒险
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.3</span>
@@ -770,7 +778,7 @@ html_doc = """
                             1998&nbsp;/&nbsp;美国&nbsp;/&nbsp;剧情 科幻
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.3</span>
@@ -810,7 +818,7 @@ html_doc = """
                             2009&nbsp;/&nbsp;印度&nbsp;/&nbsp;剧情 喜剧 爱情 歌舞
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.2</span>
@@ -850,7 +858,7 @@ html_doc = """
                             2008&nbsp;/&nbsp;美国&nbsp;/&nbsp;科幻 动画 冒险
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.3</span>
@@ -890,7 +898,7 @@ html_doc = """
                             2004&nbsp;/&nbsp;法国 瑞士 德国&nbsp;/&nbsp;剧情 音乐
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.3</span>
@@ -930,7 +938,7 @@ html_doc = """
                             1995&nbsp;/&nbsp;中国香港 中国大陆&nbsp;/&nbsp;喜剧 爱情 奇幻 古装
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.2</span>
@@ -969,7 +977,7 @@ html_doc = """
                             2011&nbsp;/&nbsp;韩国&nbsp;/&nbsp;剧情
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.3</span>
@@ -1009,7 +1017,7 @@ html_doc = """
                             2016&nbsp;/&nbsp;美国&nbsp;/&nbsp;喜剧 动画 冒险
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.2</span>
@@ -1049,7 +1057,7 @@ html_doc = """
                             2002&nbsp;/&nbsp;中国香港&nbsp;/&nbsp;剧情 犯罪 悬疑
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.2</span>
@@ -1089,7 +1097,7 @@ html_doc = """
                             1972&nbsp;/&nbsp;美国&nbsp;/&nbsp;剧情 犯罪
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.3</span>
@@ -1129,7 +1137,7 @@ html_doc = """
                             1988&nbsp;/&nbsp;日本&nbsp;/&nbsp;动画 奇幻 冒险
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.2</span>
@@ -1169,7 +1177,7 @@ html_doc = """
                             2006&nbsp;/&nbsp;美国&nbsp;/&nbsp;剧情 传记 家庭
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.1</span>
@@ -1209,7 +1217,7 @@ html_doc = """
                             2010&nbsp;/&nbsp;美国&nbsp;/&nbsp;剧情 喜剧 爱情
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.1</span>
@@ -1248,7 +1256,7 @@ html_doc = """
                             2011&nbsp;/&nbsp;法国&nbsp;/&nbsp;剧情 喜剧
                         </p>
 
-                        
+
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.2</span>
@@ -1267,45 +1275,45 @@ html_doc = """
 
 
 
-    
-    
-    
+
+
+
 
         <div class="paginator">
         <span class="prev">
             &lt;前页
         </span>
-        
-        
+
+
 
                 <span class="thispage">1</span>
-                
+
             <a href="?start=25&amp;filter=">2</a>
-        
-                
+
+
             <a href="?start=50&amp;filter=">3</a>
-        
-                
+
+
             <a href="?start=75&amp;filter=">4</a>
-        
-                
+
+
             <a href="?start=100&amp;filter=">5</a>
-        
-                
+
+
             <a href="?start=125&amp;filter=">6</a>
-        
-                
+
+
             <a href="?start=150&amp;filter=">7</a>
-        
-                
+
+
             <a href="?start=175&amp;filter=">8</a>
-        
-                
+
+
             <a href="?start=200&amp;filter=">9</a>
-        
-                
+
+
             <a href="?start=225&amp;filter=">10</a>
-        
+
         <span class="next">
             <link rel="next" href="?start=25&amp;filter=">
             <a href="?start=25&amp;filter=">后页&gt;</a>
@@ -1318,7 +1326,7 @@ html_doc = """
 
             </div>
             <div class="aside">
-                
+
 <p class="pl">
     豆瓣用户每天都在对“看过”的电影进行“很差”到“力荐”的评价，豆瓣根据每部影片看过的人数以及该影片所得的评价等综合数据，通过算法分析产生豆瓣电影 Top 250。
 </p>
@@ -1350,15 +1358,15 @@ html_doc = """
 
             </div>
             <div class="extra">
-                
+
             </div>
         </div>
     </div>
 
-        
+
     <div id="footer">
             <div class="footer-extra"></div>
-        
+
 <span id="icp" class="fleft gray-link">
     © 2005－2020 douban.com, all rights reserved 北京豆网科技有限公司
 </span>
@@ -1370,7 +1378,7 @@ html_doc = """
     · <a href="https://www.douban.com/jobs">在豆瓣工作</a>
     · <a href="https://www.douban.com/about?topic=contactus">联系我们</a>
     · <a href="https://www.douban.com/about/legal">法律声明</a>
-    
+
     · <a href="https://help.douban.com/?app=movie" target="_blank">帮助中心</a>
     · <a href="https://www.douban.com/doubanapp/">移动应用</a>
     · <a href="https://www.douban.com/partner/">豆瓣广告</a>
@@ -1380,8 +1388,8 @@ html_doc = """
 
     </div>
     <!-- COLLECTED JS -->
-        
-        
+
+
     <link rel="stylesheet" type="text/css" href="https://img3.doubanio.com/f/shire/8377b9498330a2e6f056d863987cc7a37eb4d486/css/ui/dialog.css">
     <link rel="stylesheet" type="text/css" href="https://img3.doubanio.com/f/movie/4aca95d66d37ec0712b3d19973b5d8feb75f2f05/css/movie/mod/reg_login_pop.css">
     <script type="text/javascript" src="https://img3.doubanio.com/f/shire/77323ae72a612bba8b65f845491513ff3329b1bb/js/do.js" data-cfg-autoload="false"></script>
@@ -1391,13 +1399,13 @@ html_doc = """
 var account_pop={open:function(o,e){e?referrer="?referrer="+encodeURIComponent(e):referrer="?referrer="+window.location.href;var n="",i="",t=448;n="用户登录",i="https://accounts.douban.com/passport/login_popup?source=movie";var r=document.location.protocol+"//"+document.location.hostname,a=dui.Dialog({width:340,title:n,height:t,cls:"account_pop",isHideTitle:!0,modal:!0,content:"<iframe scrolling='no' frameborder='0' width='340' height='"+t+"' src='"+i+"' name='"+r+"'></iframe>"},!0),c=a.node;if(c.undelegate(),c.delegate(".dui-dialog-close","click",function(){var o=$("body");o.find("#login_msk").hide(),o.find(".account_pop").remove()}),$(window).width()<478){var d="";"reg"===o?d=HTTPS_DB+"/accounts/register"+referrer:"login"===o&&(d=HTTPS_DB+"/accounts/login"+referrer),window.location.href=d}else a.open();$(window).bind("message",function(o){"https://accounts.douban.com"===o.originalEvent.origin&&(c.find("iframe").css("height",o.originalEvent.data),c.height(o.originalEvent.data),a.update())})}};Douban&&Douban.init_show_login&&(Douban.init_show_login=function(o){var e=$(o);e.click(function(){var o=e.data("ref")||"";return account_pop.open("login",o),!1})}),Do(function(){$("body").delegate(".pop_register","click",function(o){o.preventDefault();var e=$(this).data("ref")||"";return account_pop.open("reg",e),!1}),$("body").delegate(".pop_login","click",function(o){o.preventDefault();var e=$(this).data("ref")||"";return account_pop.open("login",e),!1})});
     </script>
 
-    
-    
 
 
 
 
-    
+
+
+
 <script type="text/javascript">
     (function (global) {
         var newNode = global.document.createElement('script'),
@@ -1430,8 +1438,8 @@ var account_pop={open:function(o,e){e?referrer="?referrer="+encodeURIComponent(e
 
 
 
-    
-  
+
+
 
 
 
@@ -1487,7 +1495,7 @@ var _gaq = _gaq || []
       _gaq.push([method('_setAccount'), account.id]);
       _gaq.push([method('_setSampleRate'), '5']);
 
-      
+
   _gaq.push([method('_addOrganic'), 'google', 'q'])
   _gaq.push([method('_addOrganic'), 'baidu', 'wd'])
   _gaq.push([method('_addOrganic'), 'soso', 'w'])
@@ -1533,7 +1541,7 @@ for(var i = 0, l = accounts.length; i < l; i++) {
 
 
 
-      
+
 
     <!-- dae-web-movie--default-f89c486df-gv27b-->
 
@@ -1546,63 +1554,131 @@ for(var i = 0, l = accounts.length; i < l; i++) {
 <div id="search_suggest" style="display: none; top: 78px; left: 296.90625px;"><ul></ul></div></body></html>
 """
 
-soup = BeautifulSoup(html_doc,"html.parser")
-# print(type(soup.title))
-# print(soup.head)
 
-# print("所有的链接")
-# links = soup.find_all('a')
-# for link in links:
-#     print(link['href'],link.get_text())
+#1请求一个网页
+def request_url(url,f="get",**var):
+    '''
+    :param url:
+    :param f:
+    :param var:
+    :return:
+    '''
+    head = {
+    'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.1 Safari/605.1.15'
+    }
 
-# print("特定地址链接")
-# link = soup.find('a',href="http://example.com/elsie")
-# print(link.name,link['href'],link['class'],link.get_text())
-# print("正则表达式匹配")
-# find_all( name , attrs , recursive , text , **kwargs )
-# partten = re.compile(r'<span class="title".*')
-# item = soup.find('div',class_="item")
-# link = item.find_next('a').attrs['href']
-# cname = item.find_next('span',class_="title").text
-# ename = item.find_next('span',class_="title",).text
-# oname = item.find_next('span',class_="other").text
-# actors = item.find_next('p',class_="").text
-# quote = item.find_next('p',class_="quote").text
-# comment = item.find_next('span',class_="rating_num").text
-# pic = item.find_next('img').attrs['src']
-# print(re.search(r'主演.*/...',actors)[0],'\n',quote,'\n',comment)
-
-# print(cname,'\n',ename)
-# print("获得P段落的文字")
-# p_node = soup.find('p',class_ ='story')
-# print(p_node.name,p_node['class'],p_node.get_text)
-items = soup.find_all('div',class_="item")
-id = 1
-for item in items:
-    id+=1
-    print(id)
-    link = item.find_next('a').attrs['href']
-    name = item.findChildren ('span',class_="title")
-    cname = name[0].text
-    if len(name)>1:
-        ename = name[1].text
+    if f.lower() == "get":
+        r = requests.get(url,headers=head)
+    elif f.lower() == "post":
+        if 'pyload' in var:
+            r = requests.post(url,var['pyload'])
+        else:
+            print("need pyload for POST function!")
     else:
-        ename = ""
-    print(cname)
+        return "function error!"
+    print("成功请求网页！")
+    print(r.status_code)
+    return r.text
+    pass
+#2.解析一个网页
+def parse_url(html):
+    '''
+    :param html:
+    :return:解析后的数据
+    '''
+    soup = BeautifulSoup(html, "html.parser")
+    items = soup.find_all('div', class_="item")
+
+    data_list = []
+    for item in items:
+        data = []
+        link = item.find_next('a').attrs['href']
+        name = item.findChildren('span', class_="title")
+        cname = name[0].text
+        if len(name) > 1:
+            ename = name[1].text
+        else:
+            ename = ""
+        try:
+            actors = re.search(r'主演.*...', item.find_next('p', class_="").text)
+        except TypeError as e:
+            actors = ""
+        quote = item.find_next('p', class_="quote").text
+        comment = item.find_next('span', class_="rating_num").text
+        pic = item.find_next('img').attrs['src']
+        data_list.append([cname,ename,comment,quote,link,pic])
+    return data_list
+    pass
+#3.存取数据
+def initDB(savepath):
+
+    conn = sqlite3.connect(savepath)
+    print("打开{name}成功".format(name=savepath))
+    c = conn.cursor()
+    drop_sql ='''
+         DROP TABLE savepath.db.TOP250
+    '''
     try:
-        actors = re.search(r'主演.*...', item.find_next('p', class_="").text)
-    except TypeError as e:
-        actors=""
-    quote = item.find_next('p', class_="quote").text
-    comment = item.find_next('span', class_="rating_num").text
-    pic = item.find_next('img').attrs['src']
-    print(actors,'\n',quote,'\n',comment)
+        c.execute('''CREATE TABLE IF NOT EXISTS TOP250(
+                ID INT  PRIMARY KEY NOT NULL,
+                cname TEXT,
+                ename TEXT,
+                comment REAL,
+                quote TEXT, 
+                link TEXT,
+                pic BLOB);''')
+        print("成功创建表TOP250")
+    except:
+        c.execute(drop_sql)
+        print("清空数据库")
+    c.close()
+    conn.commit()
+    conn.close()
+    pass
+def insertDB(ID,data,savepath):
+    conn = sqlite3.connect(savepath)
+    print("打开{name}成功".format(name=savepath))
+    c = conn.cursor()
+    sql='''INSERT INTO top250(ID,cname)
+            VALUES({ID},'{cname}')
+    '''.format(ID=ID,cname=str(data[0]))
+    print(sql)
+    c.execute(sql)
+    print("插入成功")
+    c.close()
+    conn.commit()
+    conn.close()
+def saveInDB(id,data_list,savepath):
+    '''
+    :param savepath:
+    :return:1成功，0失败
+    '''
 
+    initDB(savepath)
+    for i in range(25):
+        insertDB(id*25+i,data_list[i],savepath)
+        # print(id*25+i,data_list[i])
+    return 1
+    pass
+def saveInExel(savepath):
+    '''
+    :param savepath:
+    :return:1成功，0失败
+    '''
+    return 1
+    pass
 
-####### 文档的遍历
-# print(soup.head.contents[1])
-####### 文档搜索
-# soup.select("text")
-# soup.select("class")
-# soup.select("div > class")
-# soup.select("div ~ img")
+def main():
+    #print("we are in %s"%__name__)
+    url = "http://movie.douban.com/top250?start=0"
+    urlT = "http://www.httpbin.org"
+    savepath = './danbantop250.db'
+    #1.
+    # html = request_url(url)
+    #2.
+    data_list = parse_url(html)
+    #3.
+    saveInDB(0,data_list,savepath)
+if __name__ == '__main__':
+    main()
+
