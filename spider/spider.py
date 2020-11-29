@@ -8,35 +8,38 @@
 #4.使用flask进行网页展示，***包进行可视化
 ####################################
 
-import requests,re,sqlite3
+import requests,re,sqlite3,xmlx
 from bs4 import BeautifulSoup
 
-html = """
-<html lang="zh-CN" class="ua-mac ua-webkit"><head>
+
+htmlin = '''
+<!DOCTYPE html>
+<html lang="zh-CN" class="ua-mac ua-webkit">
+<head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="renderer" content="webkit">
     <meta name="referrer" content="always">
-    <meta name="google-site-verification" content="ok0wCgT20tBBgo9_zat2iAcimtN4Ftf5ccsh092Xeyw">
+    <meta name="google-site-verification" content="ok0wCgT20tBBgo9_zat2iAcimtN4Ftf5ccsh092Xeyw" />
     <title>
 豆瓣电影 Top 250
 </title>
-
-    <meta name="baidu-site-verification" content="cZdR4xxR7RxmM4zE">
+    
+    <meta name="baidu-site-verification" content="cZdR4xxR7RxmM4zE" />
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="Sun, 6 Mar 2005 01:00:00 GMT">
-
+    
     <link rel="apple-touch-icon" href="https://img3.doubanio.com/f/movie/d59b2715fdea4968a450ee5f6c95c7d7a2030065/pics/movie/apple-touch-icon.png">
     <link href="https://img3.doubanio.com/f/shire/859dba5cddc7ed1435808cf5a8ddde5792cd6e0c/css/douban.css" rel="stylesheet" type="text/css">
     <link href="https://img3.doubanio.com/f/shire/db02bd3a4c78de56425ddeedd748a6804af60ee9/css/separation/_all.css" rel="stylesheet" type="text/css">
     <link href="https://img3.doubanio.com/f/movie/252bef058b97005c6a41e8f1b9f7b06b84bc71b3/css/movie/base/init.css" rel="stylesheet">
-    <script type="text/javascript" defer="" async="" src="https://img3.doubanio.com/dae/fundin/piwik.js"></script><script type="text/javascript" src="//img1.doubanio.com/czF5ODV4Ni9mL2FkanMvMjBiYWY2MDg2ZWQ0MDE1YTNmMDJhNDYxMzhmNmM0MjQxYjExYWYwMC9hZC5yZWxlYXNlLmpz" async="true"></script><script type="text/javascript">var _head_start = new Date();</script>
+    <script type="text/javascript">var _head_start = new Date();</script>
     <script type="text/javascript" src="https://img3.doubanio.com/f/movie/0495cb173e298c28593766009c7b0a953246c5b5/js/movie/lib/jquery.js"></script>
     <script type="text/javascript" src="https://img3.doubanio.com/f/shire/5ecaf46d6954d5a30bc7d99be86ae34031646e00/js/douban.js"></script>
     <script type="text/javascript" src="https://img3.doubanio.com/f/shire/0efdc63b77f895eaf85281fb0e44d435c6239a3f/js/separation/_all.js"></script>
-
-<link href="https://img3.doubanio.com/f/movie/2c95f768ea74284b900c04c0209b0a44f0a0de52/css/movie/top_movies.css" rel="stylesheet" type="text/css">
+    
+<link href="https://img3.doubanio.com/f/movie/2c95f768ea74284b900c04c0209b0a44f0a0de52/css/movie/top_movies.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="https://img3.doubanio.com/f/shire/77323ae72a612bba8b65f845491513ff3329b1bb/js/do.js" data-cfg-autoload="false"></script>
-<script type="text/javascript">
+<script type='text/javascript'>
     Do.ready(function(){
             $("#mine-selector input[type='checkbox']").click(function(){
                 var val = $(this).is(":checked")?$(this).val():"";
@@ -53,14 +56,14 @@ html = """
     <link rel="stylesheet" href="https://img3.doubanio.com/misc/mixed_static/562925b5e3824700.css">
 
     <link rel="shortcut icon" href="https://img3.doubanio.com/favicon.ico" type="image/x-icon">
-<script src="https://ssl.google-analytics.com/ga.js" async="true"></script></head>
+</head>
 
 <body>
-
+  
     <script type="text/javascript">var _body_start = new Date();</script>
 
-
-
+    
+    
 
 
 
@@ -70,7 +73,7 @@ html = """
 
 <div id="db-global-nav" class="global-nav">
   <div class="bd">
-
+    
 <div class="top-nav-info">
   <a href="https://accounts.douban.com/passport/login?source=movie" class="nav-login" rel="nofollow">登录/注册</a>
 </div>
@@ -86,14 +89,14 @@ html = """
     <p class="appintro-title">豆瓣</p>
     <p class="qrcode">扫码直接下载</p>
     <div class="download">
-      <a href="https://www.douban.com/doubanapp/redirect?channel=top-nav&amp;direct_dl=1&amp;download=iOS">iPhone</a>
+      <a href="https://www.douban.com/doubanapp/redirect?channel=top-nav&direct_dl=1&download=iOS">iPhone</a>
       <span>·</span>
-      <a href="https://www.douban.com/doubanapp/redirect?channel=top-nav&amp;direct_dl=1&amp;download=Android" class="download-android">Android</a>
+      <a href="https://www.douban.com/doubanapp/redirect?channel=top-nav&direct_dl=1&download=Android" class="download-android">Android</a>
     </div>
   </div>
 </div>
 
-
+    
 
 
 <div class="global-nav-items">
@@ -105,7 +108,7 @@ html = """
       <a href="https://book.douban.com" target="_blank" data-moreurl-dict="{&quot;from&quot;:&quot;top-nav-click-book&quot;,&quot;uid&quot;:&quot;0&quot;}">读书</a>
     </li>
     <li class="on">
-      <a href="https://movie.douban.com" data-moreurl-dict="{&quot;from&quot;:&quot;top-nav-click-movie&quot;,&quot;uid&quot;:&quot;0&quot;}">电影</a>
+      <a href="https://movie.douban.com"  data-moreurl-dict="{&quot;from&quot;:&quot;top-nav-click-movie&quot;,&quot;uid&quot;:&quot;0&quot;}">电影</a>
     </li>
     <li class="">
       <a href="https://music.douban.com" target="_blank" data-moreurl-dict="{&quot;from&quot;:&quot;top-nav-click-music&quot;,&quot;uid&quot;:&quot;0&quot;}">音乐</a>
@@ -117,16 +120,16 @@ html = """
       <a href="https://www.douban.com/group" target="_blank" data-moreurl-dict="{&quot;from&quot;:&quot;top-nav-click-group&quot;,&quot;uid&quot;:&quot;0&quot;}">小组</a>
     </li>
     <li class="">
-      <a href="https://read.douban.com/?dcs=top-nav&amp;dcm=douban" target="_blank" data-moreurl-dict="{&quot;from&quot;:&quot;top-nav-click-read&quot;,&quot;uid&quot;:&quot;0&quot;}">阅读</a>
+      <a href="https://read.douban.com&#47;?dcs=top-nav&amp;dcm=douban" target="_blank" data-moreurl-dict="{&quot;from&quot;:&quot;top-nav-click-read&quot;,&quot;uid&quot;:&quot;0&quot;}">阅读</a>
     </li>
     <li class="">
-      <a href="https://douban.fm/?from_=shire_top_nav" target="_blank" data-moreurl-dict="{&quot;from&quot;:&quot;top-nav-click-fm&quot;,&quot;uid&quot;:&quot;0&quot;}">FM</a>
+      <a href="https://douban.fm&#47;?from_=shire_top_nav" target="_blank" data-moreurl-dict="{&quot;from&quot;:&quot;top-nav-click-fm&quot;,&quot;uid&quot;:&quot;0&quot;}">FM</a>
     </li>
     <li class="">
-      <a href="https://time.douban.com/?dt_time_source=douban-web_top_nav" target="_blank" data-moreurl-dict="{&quot;from&quot;:&quot;top-nav-click-time&quot;,&quot;uid&quot;:&quot;0&quot;}">时间</a>
+      <a href="https://time.douban.com&#47;?dt_time_source=douban-web_top_nav" target="_blank" data-moreurl-dict="{&quot;from&quot;:&quot;top-nav-click-time&quot;,&quot;uid&quot;:&quot;0&quot;}">时间</a>
     </li>
     <li class="">
-      <a href="https://market.douban.com/?utm_campaign=douban_top_nav&amp;utm_source=douban&amp;utm_medium=pc_web" target="_blank" data-moreurl-dict="{&quot;from&quot;:&quot;top-nav-click-market&quot;,&quot;uid&quot;:&quot;0&quot;}">豆品</a>
+      <a href="https://market.douban.com&#47;?utm_campaign=douban_top_nav&amp;utm_source=douban&amp;utm_medium=pc_web" target="_blank" data-moreurl-dict="{&quot;from&quot;:&quot;top-nav-click-market&quot;,&quot;uid&quot;:&quot;0&quot;}">豆品</a>
     </li>
   </ul>
 </div>
@@ -148,7 +151,7 @@ html = """
 
 
 
-
+    
 
 
 
@@ -161,42 +164,51 @@ html = """
   <div class="nav-wrap">
   <div class="nav-primary">
     <div class="nav-logo">
-      <a href="https://movie.douban.com">豆瓣电影</a>
+      <a href="https:&#47;&#47;movie.douban.com">豆瓣电影</a>
     </div>
     <div class="nav-search">
-      <form action="https://search.douban.com/movie/subject_search" method="get">
+      <form action="https:&#47;&#47;search.douban.com&#47;movie/subject_search" method="get">
         <fieldset>
           <legend>搜索：</legend>
           <label for="inp-query">
           </label>
-          <div class="inp"><input id="inp-query" name="search_text" size="22" maxlength="60" placeholder="搜索电影、电视剧、综艺、影人" value="" autocomplete="off"></div>
+          <div class="inp"><input id="inp-query" name="search_text" size="22" maxlength="60" placeholder="搜索电影、电视剧、综艺、影人" value=""></div>
           <div class="inp-btn"><input type="submit" value="搜索"></div>
-          <input type="hidden" name="cat" value="1002">
+          <input type="hidden" name="cat" value="1002" />
         </fieldset>
       </form>
     </div>
   </div>
   </div>
   <div class="nav-secondary">
-
+    
 
 <div class="nav-items">
   <ul>
-    <li><a href="https://movie.douban.com/cinema/nowplaying/">影讯&amp;购票</a>
+    <li    ><a href="https://movie.douban.com/cinema/nowplaying/"
+     >影讯&购票</a>
     </li>
-    <li><a href="https://movie.douban.com/explore">选电影</a>
+    <li    ><a href="https://movie.douban.com/explore"
+     >选电影</a>
     </li>
-    <li><a href="https://movie.douban.com/tv/">电视剧</a>
+    <li    ><a href="https://movie.douban.com/tv/"
+     >电视剧</a>
     </li>
-    <li><a href="https://movie.douban.com/chart">排行榜</a>
+    <li    ><a href="https://movie.douban.com/chart"
+     >排行榜</a>
     </li>
-    <li><a href="https://movie.douban.com/tag/">分类</a>
+    <li    ><a href="https://movie.douban.com/tag/"
+     >分类</a>
     </li>
-    <li><a href="https://movie.douban.com/review/best/">影评</a>
+    <li    ><a href="https://movie.douban.com/review/best/"
+     >影评</a>
     </li>
-    <li><a href="https://movie.douban.com/annual/2019?source=navigation">2019年度榜单</a>
+    <li    ><a href="https://movie.douban.com/annual/2019?source=navigation"
+     >2019年度榜单</a>
     </li>
-    <li><a href="https://m.douban.com/standbyme/annual2019?source=navigation" target="_blank">2019书影音报告</a>
+    <li    ><a href="https://m.douban.com/standbyme/annual2019?source=navigation"
+            target="_blank"
+     >2019书影音报告</a>
     </li>
   </ul>
 </div>
@@ -241,20 +253,20 @@ html = """
 
 
 
-
+    
     <div id="wrapper">
+        
 
-
-
+        
     <div id="content">
-
+        
     <h1>豆瓣电影 Top 250</h1>
 
         <div class="grid-16-8 clearfix">
-
-
+            
+            
             <div class="article">
-
+                
 
 
 
@@ -264,12 +276,12 @@ html = """
 
 <div class="opt mod">
     <div class="tabs">
-
-
+      
+    
 
     </div>
     <span id="mine-selector">
-      <input type="checkbox" value="unwatched">我没看过的
+      <input type="checkbox"  value="unwatched">我没看过的
     </span>
 </div>
 
@@ -301,12 +313,12 @@ html = """
                             1994&nbsp;/&nbsp;美国&nbsp;/&nbsp;犯罪 剧情
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating5-t"></span>
                                 <span class="rating_num" property="v:average">9.7</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>2196621人评价</span>
+                                <span>2199414人评价</span>
                         </div>
 
                             <p class="quote">
@@ -340,12 +352,12 @@ html = """
                             1993&nbsp;/&nbsp;中国大陆 中国香港&nbsp;/&nbsp;剧情 爱情 同性
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating5-t"></span>
                                 <span class="rating_num" property="v:average">9.6</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>1629471人评价</span>
+                                <span>1631659人评价</span>
                         </div>
 
                             <p class="quote">
@@ -380,12 +392,12 @@ html = """
                             1994&nbsp;/&nbsp;美国&nbsp;/&nbsp;剧情 爱情
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating5-t"></span>
                                 <span class="rating_num" property="v:average">9.5</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>1656561人评价</span>
+                                <span>1658301人评价</span>
                         </div>
 
                             <p class="quote">
@@ -419,12 +431,12 @@ html = """
                             1994&nbsp;/&nbsp;法国 美国&nbsp;/&nbsp;剧情 动作 犯罪
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.4</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>1840586人评价</span>
+                                <span>1842491人评价</span>
                         </div>
 
                             <p class="quote">
@@ -459,12 +471,12 @@ html = """
                             1997&nbsp;/&nbsp;美国&nbsp;/&nbsp;剧情 爱情 灾难
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.4</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>1612355人评价</span>
+                                <span>1614231人评价</span>
                         </div>
 
                             <p class="quote">
@@ -498,12 +510,12 @@ html = """
                             1997&nbsp;/&nbsp;意大利&nbsp;/&nbsp;剧情 喜剧 爱情 战争
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating5-t"></span>
                                 <span class="rating_num" property="v:average">9.5</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>1026729人评价</span>
+                                <span>1027755人评价</span>
                         </div>
 
                             <p class="quote">
@@ -538,12 +550,12 @@ html = """
                             2001&nbsp;/&nbsp;日本&nbsp;/&nbsp;剧情 动画 奇幻
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.4</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>1726130人评价</span>
+                                <span>1728515人评价</span>
                         </div>
 
                             <p class="quote">
@@ -565,7 +577,7 @@ html = """
                     <div class="hd">
                         <a href="https://movie.douban.com/subject/1295124/" class="">
                             <span class="title">辛德勒的名单</span>
-                                    <span class="title">&nbsp;/&nbsp;Schindler's List</span>
+                                    <span class="title">&nbsp;/&nbsp;Schindler&#39;s List</span>
                                 <span class="other">&nbsp;/&nbsp;舒特拉的名单(港)  /  辛德勒名单</span>
                         </a>
 
@@ -578,12 +590,12 @@ html = """
                             1993&nbsp;/&nbsp;美国&nbsp;/&nbsp;剧情 历史 战争
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating5-t"></span>
                                 <span class="rating_num" property="v:average">9.5</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>844887人评价</span>
+                                <span>845771人评价</span>
                         </div>
 
                             <p class="quote">
@@ -618,12 +630,12 @@ html = """
                             2010&nbsp;/&nbsp;美国 英国&nbsp;/&nbsp;剧情 科幻 悬疑 冒险
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.3</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>1609528人评价</span>
+                                <span>1611142人评价</span>
                         </div>
 
                             <p class="quote">
@@ -645,7 +657,7 @@ html = """
                     <div class="hd">
                         <a href="https://movie.douban.com/subject/3011091/" class="">
                             <span class="title">忠犬八公的故事</span>
-                                    <span class="title">&nbsp;/&nbsp;Hachi: A Dog's Tale</span>
+                                    <span class="title">&nbsp;/&nbsp;Hachi: A Dog&#39;s Tale</span>
                                 <span class="other">&nbsp;/&nbsp;秋田犬八千(港)  /  忠犬小八(台)</span>
                         </a>
 
@@ -658,12 +670,12 @@ html = """
                             2009&nbsp;/&nbsp;美国 英国&nbsp;/&nbsp;剧情
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.4</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>1099536人评价</span>
+                                <span>1100720人评价</span>
                         </div>
 
                             <p class="quote">
@@ -685,7 +697,7 @@ html = """
                     <div class="hd">
                         <a href="https://movie.douban.com/subject/1292001/" class="">
                             <span class="title">海上钢琴师</span>
-                                    <span class="title">&nbsp;/&nbsp;La leggenda del pianista sull'oceano</span>
+                                    <span class="title">&nbsp;/&nbsp;La leggenda del pianista sull&#39;oceano</span>
                                 <span class="other">&nbsp;/&nbsp;声光伴我飞(港)  /  一九零零的传奇</span>
                         </a>
 
@@ -698,12 +710,12 @@ html = """
                             1998&nbsp;/&nbsp;意大利&nbsp;/&nbsp;剧情 音乐
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.3</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>1311110人评价</span>
+                                <span>1312554人评价</span>
                         </div>
 
                             <p class="quote">
@@ -738,12 +750,12 @@ html = """
                             2014&nbsp;/&nbsp;美国 英国 加拿大 冰岛&nbsp;/&nbsp;剧情 科幻 冒险
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.3</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>1281510人评价</span>
+                                <span>1283264人评价</span>
                         </div>
 
                             <p class="quote">
@@ -778,12 +790,12 @@ html = """
                             1998&nbsp;/&nbsp;美国&nbsp;/&nbsp;剧情 科幻
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.3</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>1194945人评价</span>
+                                <span>1196680人评价</span>
                         </div>
 
                             <p class="quote">
@@ -818,12 +830,12 @@ html = """
                             2009&nbsp;/&nbsp;印度&nbsp;/&nbsp;剧情 喜剧 爱情 歌舞
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.2</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>1465417人评价</span>
+                                <span>1467082人评价</span>
                         </div>
 
                             <p class="quote">
@@ -858,12 +870,12 @@ html = """
                             2008&nbsp;/&nbsp;美国&nbsp;/&nbsp;科幻 动画 冒险
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.3</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>1033491人评价</span>
+                                <span>1034542人评价</span>
                         </div>
 
                             <p class="quote">
@@ -898,12 +910,12 @@ html = """
                             2004&nbsp;/&nbsp;法国 瑞士 德国&nbsp;/&nbsp;剧情 音乐
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.3</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>1017289人评价</span>
+                                <span>1018448人评价</span>
                         </div>
 
                             <p class="quote">
@@ -938,12 +950,12 @@ html = """
                             1995&nbsp;/&nbsp;中国香港 中国大陆&nbsp;/&nbsp;喜剧 爱情 奇幻 古装
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.2</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>1172224人评价</span>
+                                <span>1173753人评价</span>
                         </div>
 
                             <p class="quote">
@@ -977,12 +989,12 @@ html = """
                             2011&nbsp;/&nbsp;韩国&nbsp;/&nbsp;剧情
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.3</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>717760人评价</span>
+                                <span>718724人评价</span>
                         </div>
 
                             <p class="quote">
@@ -1017,12 +1029,12 @@ html = """
                             2016&nbsp;/&nbsp;美国&nbsp;/&nbsp;喜剧 动画 冒险
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.2</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>1411734人评价</span>
+                                <span>1413843人评价</span>
                         </div>
 
                             <p class="quote">
@@ -1057,12 +1069,12 @@ html = """
                             2002&nbsp;/&nbsp;中国香港&nbsp;/&nbsp;剧情 犯罪 悬疑
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.2</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>961319人评价</span>
+                                <span>962785人评价</span>
                         </div>
 
                             <p class="quote">
@@ -1085,7 +1097,7 @@ html = """
                         <a href="https://movie.douban.com/subject/1291841/" class="">
                             <span class="title">教父</span>
                                     <span class="title">&nbsp;/&nbsp;The Godfather</span>
-                                <span class="other">&nbsp;/&nbsp;Mario Puzo's The Godfather</span>
+                                <span class="other">&nbsp;/&nbsp;Mario Puzo&#39;s The Godfather</span>
                         </a>
 
 
@@ -1097,12 +1109,12 @@ html = """
                             1972&nbsp;/&nbsp;美国&nbsp;/&nbsp;剧情 犯罪
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.3</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>717550人评价</span>
+                                <span>718542人评价</span>
                         </div>
 
                             <p class="quote">
@@ -1137,12 +1149,12 @@ html = """
                             1988&nbsp;/&nbsp;日本&nbsp;/&nbsp;动画 奇幻 冒险
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.2</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>979860人评价</span>
+                                <span>981233人评价</span>
                         </div>
 
                             <p class="quote">
@@ -1177,12 +1189,12 @@ html = """
                             2006&nbsp;/&nbsp;美国&nbsp;/&nbsp;剧情 传记 家庭
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.1</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>1180013人评价</span>
+                                <span>1181250人评价</span>
                         </div>
 
                             <p class="quote">
@@ -1217,12 +1229,12 @@ html = """
                             2010&nbsp;/&nbsp;美国&nbsp;/&nbsp;剧情 喜剧 爱情
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.1</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>1376234人评价</span>
+                                <span>1378146人评价</span>
                         </div>
 
                             <p class="quote">
@@ -1256,12 +1268,12 @@ html = """
                             2011&nbsp;/&nbsp;法国&nbsp;/&nbsp;剧情 喜剧
                         </p>
 
-
+                        
                         <div class="star">
                                 <span class="rating45-t"></span>
                                 <span class="rating_num" property="v:average">9.2</span>
                                 <span property="v:best" content="10.0"></span>
-                                <span>764019人评价</span>
+                                <span>764895人评价</span>
                         </div>
 
                             <p class="quote">
@@ -1275,48 +1287,48 @@ html = """
 
 
 
-
-
-
+    
+    
+    
 
         <div class="paginator">
         <span class="prev">
             &lt;前页
         </span>
-
-
+        
+        
 
                 <span class="thispage">1</span>
-
-            <a href="?start=25&amp;filter=">2</a>
-
-
-            <a href="?start=50&amp;filter=">3</a>
-
-
-            <a href="?start=75&amp;filter=">4</a>
-
-
-            <a href="?start=100&amp;filter=">5</a>
-
-
-            <a href="?start=125&amp;filter=">6</a>
-
-
-            <a href="?start=150&amp;filter=">7</a>
-
-
-            <a href="?start=175&amp;filter=">8</a>
-
-
-            <a href="?start=200&amp;filter=">9</a>
-
-
-            <a href="?start=225&amp;filter=">10</a>
-
+                
+            <a href="?start=25&amp;filter=" >2</a>
+        
+                
+            <a href="?start=50&amp;filter=" >3</a>
+        
+                
+            <a href="?start=75&amp;filter=" >4</a>
+        
+                
+            <a href="?start=100&amp;filter=" >5</a>
+        
+                
+            <a href="?start=125&amp;filter=" >6</a>
+        
+                
+            <a href="?start=150&amp;filter=" >7</a>
+        
+                
+            <a href="?start=175&amp;filter=" >8</a>
+        
+                
+            <a href="?start=200&amp;filter=" >9</a>
+        
+                
+            <a href="?start=225&amp;filter=" >10</a>
+        
         <span class="next">
-            <link rel="next" href="?start=25&amp;filter=">
-            <a href="?start=25&amp;filter=">后页&gt;</a>
+            <link rel="next" href="?start=25&amp;filter="/>
+            <a href="?start=25&amp;filter=" >后页&gt;</a>
         </span>
 
             <span class="count">(共250条)</span>
@@ -1326,12 +1338,12 @@ html = """
 
             </div>
             <div class="aside">
-
+                
 <p class="pl">
     豆瓣用户每天都在对“看过”的电影进行“很差”到“力荐”的评价，豆瓣根据每部影片看过的人数以及该影片所得的评价等综合数据，通过算法分析产生豆瓣电影 Top 250。
 </p>
 
-<div id="dale_movie_top250_bottom_right" ad-status="appended" data-sell-type="CPM" data-type="DoubanRender" data-version="3.2.28"><div style="position: relative; margin: 0px 0px 20px; display: block; width: 300px; height: 250px; overflow: hidden;"><iframe sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation" safe-mode="custom" width="300" height="250" frameborder="0" scrolling="no" name="dale_movie_top250_bottom_right_frame" id="dale_movie_top250_bottom_right_frame" style="overflow: hidden; display: block;"></iframe><div style="line-height: 1; text-align: center; background-color: rgba(0, 0, 0, 0.3); font-size: 12px; position: absolute; right: 0px; bottom: 0px; padding: 4px; color: rgb(255, 255, 255);">广告</div></div></div>
+<div id="dale_movie_top250_bottom_right"></div>
 
 <!-- douban ad begin -->
 
@@ -1343,7 +1355,7 @@ html = """
 <div class="mobile-app-entrance block5 app-movie">
     <a class="entrance-link" href="https://www.douban.com/doubanapp/frodo">
         <div class="entrance-qrcode">
-            <img src="https://img3.doubanio.com/f/movie/a02f6ed325fc52e220f299d51e730c422e2bcd16/pics/movie/douban_app_ad/qrcode.png" alt="扫码下载豆瓣 App" width="80" height="80">
+            <img src="https://img3.doubanio.com/f/movie/a02f6ed325fc52e220f299d51e730c422e2bcd16/pics/movie/douban_app_ad/qrcode.png" alt="扫码下载豆瓣 App" width="80" height="80" />
         </div>
         <div class="entrance-info">
             <span class="app-icon icon-movie"></span>
@@ -1358,17 +1370,17 @@ html = """
 
             </div>
             <div class="extra">
-
+                
             </div>
         </div>
     </div>
 
-
+        
     <div id="footer">
             <div class="footer-extra"></div>
-
+        
 <span id="icp" class="fleft gray-link">
-    © 2005－2020 douban.com, all rights reserved 北京豆网科技有限公司
+    &copy; 2005－2020 douban.com, all rights reserved 北京豆网科技有限公司
 </span>
 
 <a href="https://www.douban.com/hnypt/variformcyst.py" style="display: none;"></a>
@@ -1378,7 +1390,7 @@ html = """
     · <a href="https://www.douban.com/jobs">在豆瓣工作</a>
     · <a href="https://www.douban.com/about?topic=contactus">联系我们</a>
     · <a href="https://www.douban.com/about/legal">法律声明</a>
-
+    
     · <a href="https://help.douban.com/?app=movie" target="_blank">帮助中心</a>
     · <a href="https://www.douban.com/doubanapp/">移动应用</a>
     · <a href="https://www.douban.com/partner/">豆瓣广告</a>
@@ -1388,10 +1400,10 @@ html = """
 
     </div>
     <!-- COLLECTED JS -->
-
-
-    <link rel="stylesheet" type="text/css" href="https://img3.doubanio.com/f/shire/8377b9498330a2e6f056d863987cc7a37eb4d486/css/ui/dialog.css">
-    <link rel="stylesheet" type="text/css" href="https://img3.doubanio.com/f/movie/4aca95d66d37ec0712b3d19973b5d8feb75f2f05/css/movie/mod/reg_login_pop.css">
+        
+        
+    <link rel="stylesheet" type="text/css" href="https://img3.doubanio.com/f/shire/8377b9498330a2e6f056d863987cc7a37eb4d486/css/ui/dialog.css" />
+    <link rel="stylesheet" type="text/css" href="https://img3.doubanio.com/f/movie/4aca95d66d37ec0712b3d19973b5d8feb75f2f05/css/movie/mod/reg_login_pop.css" />
     <script type="text/javascript" src="https://img3.doubanio.com/f/shire/77323ae72a612bba8b65f845491513ff3329b1bb/js/do.js" data-cfg-autoload="false"></script>
     <script type="text/javascript" src="https://img3.doubanio.com/f/shire/383a6e43f2108dc69e3ff2681bc4dc6c72a5ffb0/js/ui/dialog.js"></script>
     <script type="text/javascript">
@@ -1399,13 +1411,13 @@ html = """
 var account_pop={open:function(o,e){e?referrer="?referrer="+encodeURIComponent(e):referrer="?referrer="+window.location.href;var n="",i="",t=448;n="用户登录",i="https://accounts.douban.com/passport/login_popup?source=movie";var r=document.location.protocol+"//"+document.location.hostname,a=dui.Dialog({width:340,title:n,height:t,cls:"account_pop",isHideTitle:!0,modal:!0,content:"<iframe scrolling='no' frameborder='0' width='340' height='"+t+"' src='"+i+"' name='"+r+"'></iframe>"},!0),c=a.node;if(c.undelegate(),c.delegate(".dui-dialog-close","click",function(){var o=$("body");o.find("#login_msk").hide(),o.find(".account_pop").remove()}),$(window).width()<478){var d="";"reg"===o?d=HTTPS_DB+"/accounts/register"+referrer:"login"===o&&(d=HTTPS_DB+"/accounts/login"+referrer),window.location.href=d}else a.open();$(window).bind("message",function(o){"https://accounts.douban.com"===o.originalEvent.origin&&(c.find("iframe").css("height",o.originalEvent.data),c.height(o.originalEvent.data),a.update())})}};Douban&&Douban.init_show_login&&(Douban.init_show_login=function(o){var e=$(o);e.click(function(){var o=e.data("ref")||"";return account_pop.open("login",o),!1})}),Do(function(){$("body").delegate(".pop_register","click",function(o){o.preventDefault();var e=$(this).data("ref")||"";return account_pop.open("reg",e),!1}),$("body").delegate(".pop_login","click",function(o){o.preventDefault();var e=$(this).data("ref")||"";return account_pop.open("login",e),!1})});
     </script>
 
+    
+    
 
 
 
 
-
-
-
+    
 <script type="text/javascript">
     (function (global) {
         var newNode = global.document.createElement('script'),
@@ -1413,7 +1425,7 @@ var account_pop={open:function(o,e){e?referrer="?referrer="+encodeURIComponent(e
             adSource = '//erebor.douban.com/',
             userId = '',
             browserId = 'hWKCTZqqroI',
-            criteria = '3:/top250?start=0',
+            criteria = '3:/top250',
             preview = '',
             debug = false,
             adSlots = ['dale_movie_top250_bottom_right'];
@@ -1438,8 +1450,8 @@ var account_pop={open:function(o,e){e?referrer="?referrer="+encodeURIComponent(e
 
 
 
-
-
+    
+  
 
 
 
@@ -1495,7 +1507,7 @@ var _gaq = _gaq || []
       _gaq.push([method('_setAccount'), account.id]);
       _gaq.push([method('_setSampleRate'), '5']);
 
-
+      
   _gaq.push([method('_addOrganic'), 'google', 'q'])
   _gaq.push([method('_addOrganic'), 'baidu', 'wd'])
   _gaq.push([method('_addOrganic'), 'soso', 'w'])
@@ -1541,18 +1553,20 @@ for(var i = 0, l = accounts.length; i < l; i++) {
 
 
 
+      
 
-
-    <!-- dae-web-movie--default-f89c486df-gv27b-->
+    <!-- dae-web-movie--default-7849678f-rnb5d-->
 
   <script>_SPLITTEST=''</script>
+</body>
+
+</html>
 
 
 
 
 
-<div id="search_suggest" style="display: none; top: 78px; left: 296.90625px;"><ul></ul></div></body></html>
-"""
+'''
 
 
 #1请求一个网页
@@ -1588,25 +1602,32 @@ def parse_url(html):
     '''
     soup = BeautifulSoup(html, "html.parser")
     items = soup.find_all('div', class_="item")
-
     data_list = []
     for item in items:
-        data = []
         link = item.find_next('a').attrs['href']
         name = item.findChildren('span', class_="title")
         cname = name[0].text
         if len(name) > 1:
-            ename = name[1].text
+            ename = re.findall(r'[\w+ ]+',name[1].text)[0]
         else:
             ename = ""
         try:
-            actors = re.search(r'主演.*...', item.find_next('p', class_="").text)
-        except TypeError as e:
+            actors = re.search(r'主演.*...', item.find_next('p', class_="").text).group()
+        except AttributeError as e:
             actors = ""
-        quote = item.find_next('p', class_="quote").text
-        comment = item.find_next('span', class_="rating_num").text
-        pic = item.find_next('img').attrs['src']
-        data_list.append([cname,ename,comment,quote,link,pic])
+        try:
+            quote =  item.find('span',class_='inq').text
+        except:
+            quote = ""
+        try:
+            comment = item.find_next('span', class_="rating_num").text
+        except:
+            comment = ""
+        try:
+            pic = item.find_next('img').attrs['src']
+        except:
+            pic = ""
+        data_list.append([cname,ename,actors,comment,quote,link,pic])
     return data_list
     pass
 #3.存取数据
@@ -1615,49 +1636,61 @@ def initDB(savepath):
     conn = sqlite3.connect(savepath)
     print("打开{name}成功".format(name=savepath))
     c = conn.cursor()
-    drop_sql ='''
-         DROP TABLE savepath.db.TOP250
-    '''
-    try:
-        c.execute('''CREATE TABLE IF NOT EXISTS TOP250(
+    drop_sql ='''DROP TABLE TOP250'''
+    create_sql='''CREATE TABLE TOP250(
                 ID INT  PRIMARY KEY NOT NULL,
                 cname TEXT,
                 ename TEXT,
-                comment REAL,
-                quote TEXT, 
+                actors TEXT,
+                mark REAL,
+                qoute TEXT, 
                 link TEXT,
-                pic BLOB);''')
+                pic TEXT);'''
+
+    try:
+        c.execute(create_sql)
         print("成功创建表TOP250")
-    except:
+    except Exception as e:
         c.execute(drop_sql)
-        print("清空数据库")
+        c.execute(create_sql)
+        print("clear oringal table and create new table")
     c.close()
     conn.commit()
     conn.close()
+    print("close database")
     pass
-def insertDB(ID,data,savepath):
-    conn = sqlite3.connect(savepath)
-    print("打开{name}成功".format(name=savepath))
-    c = conn.cursor()
-    sql='''INSERT INTO top250(ID,cname)
-            VALUES({ID},'{cname}')
-    '''.format(ID=ID,cname=str(data[0]))
-    print(sql)
-    c.execute(sql)
-    print("插入成功")
-    c.close()
-    conn.commit()
-    conn.close()
+def insertDB(ID,data,cur):
+    sql='''INSERT INTO top250(ID,cname,ename,actors,mark,qoute,link,pic)
+            VALUES({ID},'{cname}','{ename}','{actors}',{mark},'{qoute}','{link}','{pic}')
+    '''.format(ID=ID,
+               cname=data[0],
+               ename=data[1],
+               actors=data[2],
+               mark=data[3],
+               qoute = data[4],
+               link = data[5],
+               pic = data[6])
+    try:
+        cur.execute(sql)
+        return 1
+    except :
+        return 0
+
+
 def saveInDB(id,data_list,savepath):
     '''
     :param savepath:
     :return:1成功，0失败
     '''
-
-    initDB(savepath)
+    conn = sqlite3.connect(savepath)
+    c = conn.cursor()
     for i in range(25):
-        insertDB(id*25+i,data_list[i],savepath)
-        # print(id*25+i,data_list[i])
+        if (insertDB(id*25+i,data_list[i],c)) ==0:
+            continue
+        print("Insert NO.%d data"%(id*25+i))
+    c.close()
+    conn.commit()
+    conn.close()
     return 1
     pass
 def saveInExel(savepath):
@@ -1670,15 +1703,18 @@ def saveInExel(savepath):
 
 def main():
     #print("we are in %s"%__name__)
-    url = "http://movie.douban.com/top250?start=0"
-    urlT = "http://www.httpbin.org"
-    savepath = './danbantop250.db'
-    #1.
-    # html = request_url(url)
-    #2.
-    data_list = parse_url(html)
-    #3.
-    saveInDB(0,data_list,savepath)
+    url = "http://movie.douban.com/top250?start="
+    savepath = './doubantop250.db'
+
+    initDB(savepath)
+    for i in range(10):
+        html = request_url(url+str(i*25))
+        data_list_file = parse_url(html)
+        saveInDB(i,data_list_file,savepath)
+        print("finished NO.%d html"%i)
+    print("Finished whole station")
+    pass
+
 if __name__ == '__main__':
-    main()
+    # main()
 

@@ -2,9 +2,9 @@
 
 import sqlite3
 
-conn = sqlite3.connect('test.db')
-print("打开数据库成功")
-c = conn.cursor()
+# conn = sqlite3.connect('test.db')
+# print("打开数据库成功")
+# c = conn.cursor()
 #######创建表###########
 # c.execute('''CREATE TABLE COMPANY(
 #         ID INT  PRIMARY KEY NOT NULL,
@@ -38,22 +38,36 @@ c = conn.cursor()
 
 #######查询###########
 
-sql1 = "SELECT ID,name,AGE,ADDRESS,SALARY from COMPANY"
-data_list = c.execute(sql1)
-print(data_list)
-for row in data_list:
-    print("ID=",row[0])
-    print("NAME=",row[1])
-    print("AGE=",row[2])
-    print("ADDRESS=",row[3])
-    print("SALARY=",row[4])
+# sql1 = "SELECT ID,name,AGE,ADDRESS,SALARY from COMPANY"
+# data_list = c.execute(sql1)
+# print(data_list)
+# for row in data_list:
+#     print("ID=",row[0])
+#     print("NAME=",row[1])
+#     print("AGE=",row[2])
+#     print("ADDRESS=",row[3])
+#     print("SALARY=",row[4])
+#
+#
+# conn.commit()
+# print("成功提交")
+# conn.close()
+# print("数据库已关闭")
 
 
-conn.commit()
-print("成功提交")
+dbpath = "../doubantop250.db"
+conn = sqlite3.connect(dbpath)
+c = conn.cursor()
+r = c.execute("select * from TOP250 limit 10")
+
+for row in r :
+    print("ID=%d"%row[0])
+    print("cname=%s"%row[1])
+    print("ename=%s"%row[2])
+    print("actors=%s"%row[3])
+
+c.close()
 conn.close()
-print("数据库已关闭")
-
 
 
 

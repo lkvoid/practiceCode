@@ -1575,28 +1575,30 @@ soup = BeautifulSoup(html_doc,"html.parser")
 # print(cname,'\n',ename)
 # print("获得P段落的文字")
 # p_node = soup.find('p',class_ ='story')
-# print(p_node.name,p_node['class'],p_node.get_text)
-items = soup.find_all('div',class_="item")
-id = 1
-for item in items:
-    id+=1
-    print(id)
-    link = item.find_next('a').attrs['href']
-    name = item.findChildren ('span',class_="title")
-    cname = name[0].text
-    if len(name)>1:
-        ename = name[1].text
-    else:
-        ename = ""
-    print(cname)
-    try:
-        actors = re.search(r'主演.*...', item.find_next('p', class_="").text)
-    except TypeError as e:
-        actors=""
-    quote = item.find_next('p', class_="quote").text
-    comment = item.find_next('span', class_="rating_num").text
-    pic = item.find_next('img').attrs['src']
-    print(actors,'\n',quote,'\n',comment)
+# print(p_node.name,p_node['class'],p_node.get_text)r
+item = soup.find('div',class_="item")
+s = item.find_all('span',class_='title')
+print(s[0].text)
+# items = soup.find_all('div',class_="item")
+# id = 1
+# for item in items:
+#     id+=1
+#     link = item.find_next('a').attrs['href']
+#     name = item.findChildren ('span',class_="title")
+#     cname = name[0].text
+#     if len(name)>1:
+#         ename = name[1].text
+#     else:
+#         ename = ""
+#     print(id,cname,ename)
+#     try:
+#         actors = re.search(r'主演.*...', item.find_next('p', class_="").text)
+#     except TypeError as e:
+#         actors=""
+    # quote = item.find_next('p', class_="quote").text
+    # comment = item.find_next('span', class_="rating_num").text
+    # pic = item.find_next('img').attrs['src']
+    # print(actors,'\n',quote,'\n',comment)
 
 
 ####### 文档的遍历
